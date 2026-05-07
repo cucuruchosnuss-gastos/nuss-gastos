@@ -1214,18 +1214,26 @@ async function procesarFoto(tipo){
       ? `Analiza este ticket o factura. Determina si es FACTURA o REMITO. Extrae: nombre del local/proveedor, fecha (formato YYYY-MM-DD), moneda (ARS o USD), y todos los items con descripcion, cantidad, precio unitario y subtotal. Si no puedes determinar si es factura o remito, pon tipo_doc como CONSULTAR. Responde SOLO con JSON sin texto adicional: {"tipo_doc":"FACTURA","local":"","fecha":"","moneda":"ARS","items":[{"desc":"","cant":1,"precio_unit":0,"subtotal":0}],"total":0}`
       : `Analiza esta factura o remito de materia prima. Determina si es FACTURA o REMITO. Extrae: nombre del proveedor, lista de productos con descripcion, cantidad, unidad y precio unitario si tiene, precio total si tiene, moneda (ARS o USD), fecha (formato YYYY-MM-DD). Responde SOLO con JSON sin texto adicional: {"tipo_doc":"FACTURA","proveedor":"","fecha":"","moneda":"ARS","items":[{"producto":"","cantidad":0,"unidad":"kg","precio_unit":0}],"total":0}`;
 
-    const res = await fetch(SHEETS_URL, {
-      method: 'POST',
-      body: JSON.stringify({
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', SHEETS_URL, true);
+      xhr.setRequestHeader('Content-Type', 'text/plain');
+      xhr.onload = () => {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch(e) { reject(new Error('Respuesta inválida')); }
+      };
+      xhr.onerror = () => reject(new Error('Error de red'));
+      xhr.ontimeout = () => reject(new Error('Tiempo agotado'));
+      xhr.timeout = 30000;
+      xhr.send(JSON.stringify({
         action: 'ocrFoto',
         imageBase64: base64,
         imageType: file.type,
         tipo: tipo,
         prompt: prompt
-      })
+      }));
     });
-    const data = await res.json();
-    if(!data.resultado) throw new Error('Sin resultado');
+    if(!data.resultado) throw new Error(data.msg||'Sin resultado');
     const clean = data.resultado.replace(/```json|```/g,'').trim();
     const parsed = JSON.parse(clean);
 
@@ -1523,15 +1531,17 @@ function guardarProveedor(){
 // ══════════════════════════════════════════════
 // SYNC A SHEETS
 // ══════════════════════════════════════════════
-async function syncRegistro(reg){
+function syncRegistro(reg){
   try {
-    await fetch(SHEETS_URL, {
-      method: 'POST',
-      body: JSON.stringify({action: reg.tipo==='gasto'?'saveGasto':'saveMP', ...reg})
-    });
-    DB.syncQueue = DB.syncQueue.filter(r=>r.id!==reg.id);
-    save();
-  } catch(e){ /* queda en cola, reintenta después */ }
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', SHEETS_URL, true);
+    xhr.setRequestHeader('Content-Type', 'text/plain');
+    xhr.onload = () => {
+      DB.syncQueue = DB.syncQueue.filter(r=>r.id!==reg.id);
+      save();
+    };
+    xhr.send(JSON.stringify({action: reg.tipo==='gasto'?'saveGasto':'saveMP', ...reg}));
+  } catch(e){ /* queda en cola */ }
 }
 
 // ══════════════════════════════════════════════
