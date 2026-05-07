@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Nuss — Gestión</title>
+<style>
+:root {
+  --bg: #faf7f2;
+  --bg2: #f2ece0;
+  --card: #ffffff;
+  --marron: #8B3A10;
+  --marron2: #6b2c0c;
+  --naranja: #C1622A;
+  --naranja2: #e07040;
+  --verde: #1a6b4a;
+  --verde2: #e8f5ee;
+  --rojo: #c0392b;
+  --rojo2: #fdf0ee;
+  --azul: #1a3a6b;
+  --azul2: #e8eef8;
+  --amarillo: #d4a017;
+  --amarillo2: #fdf8e8;
+  --gris: #9a7a62;
+  --gris2: #e8e0d4;
+  --tx: #2c1a0e;
+  --tx2: #7a5c42;
+  --tx3: #b8a090;
+  --sh: 0 2px 12px rgba(139,58,16,0.10);
+  --sh2: 0 4px 24px rgba(139,58,16,0.15);
+  --r: 14px;
+  --r2: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Georgia', serif; background: var(--bg); color: var(--tx); min-height: 100vh; overflow-x: hidden; }
+input, select, textarea, button { font-family: inherit; }
+
+/* ══ SCREENS ══ */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ══ HEADER ══ */
+.hdr { background: var(--marron); color: #fff; padding: 14px 18px; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.hdr-back { background: rgba(255,255,255,0.15); border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hdr-title { font-size: 17px; font-weight: bold; flex: 1; }
+.hdr-sub { font-size: 11px; opacity: 0.75; margin-top: 1px; }
+.hdr-logo { font-size: 22px; font-weight: bold; letter-spacing: 2px; }
+
+/* ══ BODY ══ */
+.body { flex: 1; padding: 18px; overflow-y: auto; }
+.body-sm { padding: 14px; }
+
+/* ══ LOGIN ══ */
+.login-wrap { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(160deg, #8B3A10 0%, #6b2c0c 40%, #2c1a0e 100%); }
+.login-logo { color: #fff; font-size: 32px; font-weight: bold; letter-spacing: 4px; margin-bottom: 4px; }
+.login-sub { color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 36px; letter-spacing: 1px; }
+.login-card { background: #fff; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
+.login-card h2 { font-size: 18px; color: var(--marron); margin-bottom: 20px; text-align: center; }
+
+/* ══ CARDS ══ */
+.card { background: var(--card); border-radius: var(--r); box-shadow: var(--sh); padding: 16px; margin-bottom: 12px; }
+.card-sm { padding: 12px; }
+
+/* ══ FORM ══ */
+.fg { margin-bottom: 14px; }
+.fl { display: block; font-size: 12px; color: var(--tx2); margin-bottom: 5px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+.fc { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gris2); border-radius: var(--r2); font-size: 15px; color: var(--tx); background: var(--bg); outline: none; transition: border-color 0.2s; }
+.fc:focus { border-color: var(--marron); background: #fff; }
+.fc-err { border-color: var(--rojo) !important; }
+
+/* ══ BUTTONS ══ */
+.btn { width: 100%; padding: 14px; border: none; border-radius: var(--r2); font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn:active { transform: scale(0.97); }
+.btn-p { background: var(--marron); color: #fff; }
+.btn-p:hover { background: var(--marron2); }
+.btn-s { background: var(--bg2); color: var(--tx); }
+.btn-s:hover { background: var(--gris2); }
+.btn-v { background: var(--verde); color: #fff; }
+.btn-r { background: var(--rojo); color: #fff; }
+.btn-sm { padding: 10px 16px; font-size: 13px; width: auto; }
+.btn-xs { padding: 7px 12px; font-size: 12px; width: auto; }
+.btn-outline { background: transparent; border: 1.5px solid var(--marron); color: var(--marron); }
+
+/* ══ MODULO BUTTONS (pantalla inicio) ══ */
+.mod-btn { background: #fff; border-radius: 18px; padding: 24px 20px; box-shadow: var(--sh2); cursor: pointer; transition: all 0.2s; border: 2px solid transparent; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; margin-bottom: 14px; }
+.mod-btn:active { transform: scale(0.97); }
+.mod-btn.gastos { border-color: var(--naranja); }
+.mod-btn.mp { border-color: var(--verde); }
+.mod-btn .mod-icon { font-size: 32px; }
+.mod-btn .mod-title { font-size: 18px; font-weight: bold; color: var(--tx); }
+.mod-btn .mod-sub { font-size: 12px; color: var(--tx2); }
+
+/* ══ OPCION BUTTONS (selección) ══ */
+.op-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.op-grid-1 { grid-template-columns: 1fr; }
+.op-btn { background: #fff; border: 2px solid var(--gris2); border-radius: var(--r); padding: 16px 12px; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.op-btn:active { transform: scale(0.96); }
+.op-btn.sel { border-color: var(--marron); background: #fff8f4; }
+.op-btn .op-icon { font-size: 26px; }
+.op-btn .op-label { font-size: 13px; font-weight: bold; color: var(--tx); }
+.op-btn .op-sub { font-size: 11px; color: var(--tx2); }
+.op-btn-info { position: relative; }
+.op-btn-info .info-btn { position: absolute; top: 6px; right: 6px; background: var(--bg2); border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; cursor: pointer; color: var(--tx2); display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.tooltip { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: var(--tx); color: #fff; padding: 8px 10px; border-radius: 8px; font-size: 11px; z-index: 200; white-space: nowrap; margin-top: 4px; box-shadow: var(--sh2); display: none; }
+.tooltip.show { display: block; }
+.tooltip::before { content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top: none; border-bottom-color: var(--tx); }
+
+/* ══ FOTO AREA ══ */
+.foto-area { background: var(--bg2); border: 2px dashed var(--gris2); border-radius: var(--r); padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 14px; }
+.foto-area:hover { border-color: var(--marron); background: #fff8f4; }
+.foto-area .fa-icon { font-size: 40px; margin-bottom: 10px; }
+.foto-area .fa-text { font-size: 14px; color: var(--tx2); }
+.foto-area img { max-width: 100%; border-radius: 8px; max-height: 200px; object-fit: cover; }
+#foto-input { display: none; }
+
+/* ══ OCR LOADING ══ */
+.ocr-loading { text-align: center; padding: 32px; }
+.ocr-spin { width: 48px; height: 48px; border: 4px solid var(--gris2); border-top-color: var(--marron); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══ TAGS ══ */
+.tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+.tag-ok { background: var(--verde2); color: var(--verde); }
+.tag-pend { background: var(--amarillo2); color: var(--amarillo); }
+.tag-anul { background: var(--rojo2); color: var(--rojo); }
+
+/* ══ HISTORIAL ITEM ══ */
+.hist-item { background: #fff; border-radius: var(--r2); padding: 12px 14px; margin-bottom: 8px; box-shadow: var(--sh); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.15s; }
+.hist-item:active { transform: scale(0.98); }
+.hist-icon { font-size: 24px; width: 44px; height: 44px; background: var(--bg2); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-title { font-size: 14px; font-weight: bold; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-sub { font-size: 12px; color: var(--tx2); margin-top: 2px; }
+.hist-monto { text-align: right; flex-shrink: 0; }
+.hist-monto .monto { font-size: 15px; font-weight: bold; color: var(--marron); }
+.hist-monto .moneda { font-size: 11px; color: var(--tx3); }
+
+/* ══ STEP INDICATOR ══ */
+.steps { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 0 4px; }
+.step { width: 8px; height: 8px; border-radius: 50%; background: var(--gris2); transition: all 0.2s; }
+.step.active { background: var(--marron); width: 20px; border-radius: 4px; }
+.step.done { background: var(--verde); }
+
+/* ══ DIVIDER ══ */
+.div { height: 1px; background: var(--gris2); margin: 14px 0; }
+
+/* ══ RESUMEN ══ */
+.resumen-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--bg2); }
+.resumen-row:last-child { border-bottom: none; }
+.resumen-label { font-size: 12px; color: var(--tx2); }
+.resumen-val { font-size: 13px; font-weight: bold; color: var(--tx); text-align: right; max-width: 60%; }
+
+/* ══ BADGE ══ */
+.badge { background: var(--rojo); color: #fff; border-radius: 20px; font-size: 10px; font-weight: bold; padding: 2px 6px; display: inline-block; }
+
+/* ══ USER CHIP ══ */
+.user-chip { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); padding: 6px 10px; border-radius: 20px; }
+.user-avatar { width: 28px; height: 28px; background: rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; color: #fff; }
+.user-name { color: #fff; font-size: 12px; font-weight: bold; }
+
+/* ══ PANEL PABLO ══ */
+.filtros-bar { background: #fff; border-radius: var(--r); padding: 14px; margin-bottom: 14px; box-shadow: var(--sh); }
+.filtros-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.filtro-btn { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--gris2); background: #fff; font-size: 12px; cursor: pointer; color: var(--tx2); transition: all 0.15s; }
+.filtro-btn.active { background: var(--marron); color: #fff; border-color: var(--marron); }
+.tabla-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--marron); color: #fff; padding: 10px 12px; text-align: left; font-size: 12px; white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--bg2); vertical-align: middle; }
+tr:hover td { background: var(--bg); }
+.td-acc { display: flex; gap: 4px; }
+
+/* ══ ADMIN ══ */
+.list-item { background: #fff; border-radius: var(--r2); padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; box-shadow: var(--sh); }
+.list-item-info { flex: 1; }
+.list-item-title { font-size: 14px; font-weight: bold; }
+.list-item-sub { font-size: 12px; color: var(--tx2); margin-top: 2px; }
+.list-item-acc { display: flex; gap: 6px; }
+
+/* ══ TOAST ══ */
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--tx); color: #fff; padding: 12px 20px; border-radius: 30px; font-size: 14px; z-index: 9999; transition: transform 0.3s; white-space: nowrap; box-shadow: var(--sh2); }
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.ok { background: var(--verde); }
+#toast.err { background: var(--rojo); }
+
+/* ══ MODAL ══ */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: flex-end; }
+.modal-bg.active { display: flex; }
+.modal { background: #fff; border-radius: 20px 20px 0 0; padding: 24px 20px; width: 100%; max-height: 80vh; overflow-y: auto; }
+.modal-title { font-size: 16px; font-weight: bold; color: var(--marron); margin-bottom: 16px; }
+
+/* ══ LOTES ══ */
+.lote-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.lote-num { width: 28px; height: 28px; background: var(--marron); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+
+/* ══ MISC ══ */
+.tsm { font-size: 11px; color: var(--tx3); margin-top: 4px; }
+.txt-c { text-align: center; }
+.txt-r { text-align: right; }
+.mt8 { margin-top: 8px; }
+.mt14 { margin-top: 14px; }
+.flex { display: flex; }
+.gap8 { gap: 8px; }
+.f1 { flex: 1; }
+.sep { height: 8px; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; background: var(--bg2); color: var(--tx2); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ -->
+<!-- LOGIN -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-logo">NUSS</div>
+    <div class="login-sub">SISTEMA DE GESTIÓN</div>
+    <div class="login-card">
+      <h2>Iniciar sesión</h2>
+      <div class="fg">
+        <label class="fl">Email</label>
+        <input class="fc" type="email" id="login-email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="fg">
+        <label class="fl">Contraseña</label>
+        <input class="fc" type="password" id="login-pass" placeholder="••••••••">
+      </div>
+      <button class="btn btn-p" onclick="doLogin()">Entrar</button>
+      <p class="tsm txt-c mt8">¿No tenés acceso? Pedíselo a tu administrador.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- INICIO -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-inicio" class="screen">
+  <div class="hdr">
+    <div class="hdr-logo">NUSS</div>
+    <div style="flex:1"></div>
+    <div class="user-chip" id="user-chip">
+      <div class="user-avatar" id="user-av">T</div>
+      <div class="user-name" id="user-nm">Usuario</div>
+    </div>
+    <button class="hdr-back" onclick="showAdmin()" title="Admin" style="margin-left:6px;">⚙️</button>
+  </div>
+  <div class="body">
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:16px;">¿Qué querés registrar?</p>
+    <button class="mod-btn gastos" onclick="iniciarGasto()">
+      <div class="mod-icon">💸</div>
+      <div class="mod-title">Cargar gasto</div>
+      <div class="mod-sub">Ticket, compra, servicio, combustible...</div>
+    </button>
+    <button class="mod-btn mp" onclick="iniciarMP()">
+      <div class="mod-icon">📦</div>
+      <div class="mod-title">Ingreso de materia prima</div>
+      <div class="mod-sub">Harina, azúcar, grasa, insumos...</div>
+    </button>
+    <div class="div"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:13px;font-weight:bold;color:var(--tx2);">Mis últimos registros</span>
+      <button class="btn btn-sm btn-s" onclick="showPablo()" style="font-size:12px;">Ver todo 📊</button>
+    </div>
+    <div id="hist-list"><p class="tsm txt-c" style="padding:20px 0;">No hay registros aún.</p></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- GASTO — PASO 1: FOTO O MANUAL -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-g1" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Nuevo gasto</div><div class="hdr-sub">Paso 1 de 5</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+    <div class="sep"></div>
+    <p style="font-size:15px;font-weight:bold;color:var(--tx);margin-bottom:16px;">¿Tenés ticket o factura?</p>
+    <div class="op-grid op-grid-1">
+      <div class="op-btn" onclick="tomarFoto('gasto')">
+        <div class="op-icon">📷</div>
+        <div class="op-label">Sí, tengo ticket</div>
+        <div class="op-sub">Sacá foto y la IA extrae los datos</div>
+      </div>
+      <div class="op-btn" onclick="showSc('sc-g2m')">
+        <div class="op-icon">✏️</div>
+        <div class="op-label">Sin ticket / a mano</div>
+        <div class="op-sub">Cargá los datos manualmente</div>
+      </div>
+    </div>
+    <input type="file" id="foto-gasto" accept="image/*" capture="environment" onchange="procesarFoto('gasto')">
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- GASTO — PASO 2: DATOS (MANUAL / OCR) -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-g2m" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Datos del gasto</div><div class="hdr-sub">Paso 2 de 5</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+    <div class="sep"></div>
+    <div id="foto-preview-g" style="display:none;margin-bottom:14px;">
+      <img id="foto-img-g" style="width:100%;border-radius:10px;max-height:160px;object-fit:cover;">
+      <p class="tsm txt-c mt8" id="ocr-status-g"></p>
+    </div>
+    <div class="fg">
+      <label class="fl">Tipo de documento</label>
+      <div style="display:flex;gap:8px;">
+        <button id="btn-factura" class="btn btn-sm btn-p" onclick="setTipoDoc('FACTURA')" style="flex:1;">🧾 Factura</button>
+        <button id="btn-remito" class="btn btn-sm btn-s" onclick="setTipoDoc('REMITO')" style="flex:1;">📋 Remito</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Nombre del local / proveedor</label>
+      <input class="fc" type="text" id="g-local" placeholder="Ej: YPF, Ferretería López...">
+    </div>
+    <div class="fg">
+      <label class="fl">Fecha</label>
+      <input class="fc" type="date" id="g-fecha">
+    </div>
+    <div class="flex gap8">
+      <div class="fg f1">
+        <label class="fl">Importe</label>
+        <input class="fc" type="number" id="g-importe" placeholder="0.00" step="0.01">
+      </div>
+      <div class="fg" style="width:90px;">
+        <label class="fl">Moneda</label>
+        <select class="fc" id="g-moneda">
+          <option value="ARS">$ ARS</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Descripción (opcional)</label>
+      <textarea class="fc" id="g-desc" rows="2" placeholder="¿Qué se compró?"></textarea>
+    </div>
+    <button class="btn btn-p" onclick="gPaso3()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- GASTO — PASO 3: DESTINO -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-g3" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">¿Para qué es?</div><div class="hdr-sub">Paso 3 de 5</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+    <div class="sep"></div>
+    <p style="font-size:14px;color:var(--tx2);margin-bottom:14px;">Seleccioná el destino del gasto:</p>
+    <div id="destinos-grid" class="op-grid"></div>
+    <div id="vehiculos-list" style="display:none;">
+      <p style="font-size:13px;font-weight:bold;color:var(--tx);margin-bottom:10px;">Seleccioná el vehículo:</p>
+      <div id="vehiculos-grid" class="op-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- GASTO — PASO 4: CATEGORÍA -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-g4" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Categoría</div><div class="hdr-sub">Paso 4 de 5</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+    <div class="sep"></div>
+    <p style="font-size:14px;color:var(--tx2);margin-bottom:14px;">¿Qué tipo de gasto es?</p>
+    <div id="cats-grid" class="op-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- GASTO — PASO 5: CONFIRMACIÓN -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-g5" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Confirmar gasto</div><div class="hdr-sub">Paso 5 de 5</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
+    <div class="sep"></div>
+    <div class="card">
+      <div id="gasto-resumen"></div>
+    </div>
+    <div class="sep"></div>
+    <button class="btn btn-v" onclick="confirmarGasto()">✓ Confirmar y guardar</button>
+    <div class="sep"></div>
+    <button class="btn btn-s" onclick="goBack()">← Corregir algo</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MP — PASO 1: FOTO O MANUAL -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-mp1" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Ingreso de materia prima</div><div class="hdr-sub">Paso 1 de 4</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step active"></div><div class="step"></div><div class="step"></div><div class="step"></div></div>
+    <div class="sep"></div>
+    <p style="font-size:15px;font-weight:bold;color:var(--tx);margin-bottom:16px;">¿Tenés factura o remito?</p>
+    <div class="op-grid op-grid-1">
+      <div class="op-btn" onclick="tomarFoto('mp')">
+        <div class="op-icon">📷</div>
+        <div class="op-label">Sí, tengo factura/remito</div>
+        <div class="op-sub">Sacá foto y la IA extrae los datos</div>
+      </div>
+      <div class="op-btn" onclick="showSc('sc-mp2')">
+        <div class="op-icon">✏️</div>
+        <div class="op-label">Sin documento / a mano</div>
+        <div class="op-sub">Cargá los datos manualmente</div>
+      </div>
+    </div>
+    <input type="file" id="foto-mp" accept="image/*" capture="environment" onchange="procesarFoto('mp')">
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MP — PASO 2: DATOS -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-mp2" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Datos del ingreso</div><div class="hdr-sub">Paso 2 de 4</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step done"></div><div class="step active"></div><div class="step"></div><div class="step"></div></div>
+    <div class="sep"></div>
+    <div id="foto-preview-mp" style="display:none;margin-bottom:14px;">
+      <img id="foto-img-mp" style="width:100%;border-radius:10px;max-height:160px;object-fit:cover;">
+      <p class="tsm txt-c mt8" id="ocr-status-mp"></p>
+    </div>
+    <div class="fg">
+      <label class="fl">Proveedor</label>
+      <input class="fc" id="mp-prov" list="prov-list" placeholder="Ej: DIMAFLO, Corone...">
+      <datalist id="prov-list"></datalist>
+    </div>
+    <div class="fg">
+      <label class="fl">Materia prima</label>
+      <select class="fc" id="mp-producto">
+        <option value="">Seleccioná...</option>
+        <option>Harina</option>
+        <option>Azúcar</option>
+        <option>Grasa</option>
+        <option>Lecitina</option>
+        <option>Colorante</option>
+        <option>Bicarbonato</option>
+        <option>Fécula</option>
+        <option>Cacao</option>
+        <option>Otro</option>
+      </select>
+    </div>
+    <div id="mp-otro-wrap" style="display:none;" class="fg">
+      <label class="fl">Especificá qué es</label>
+      <input class="fc" id="mp-otro" placeholder="Nombre del producto">
+    </div>
+    <div class="flex gap8">
+      <div class="fg f1">
+        <label class="fl">Cantidad</label>
+        <input class="fc" type="number" id="mp-cant" placeholder="0" step="0.1">
+      </div>
+      <div class="fg" style="width:90px;">
+        <label class="fl">Unidad</label>
+        <select class="fc" id="mp-unidad">
+          <option>kg</option>
+          <option>litros</option>
+          <option>unidades</option>
+          <option>bolsas</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex gap8">
+      <div class="fg f1">
+        <label class="fl">Precio total</label>
+        <input class="fc" type="number" id="mp-precio" placeholder="0.00" step="0.01">
+      </div>
+      <div class="fg" style="width:90px;">
+        <label class="fl">Moneda</label>
+        <select class="fc" id="mp-moneda">
+          <option value="ARS">$ ARS</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Fecha de ingreso</label>
+      <input class="fc" type="date" id="mp-fecha">
+    </div>
+    <button class="btn btn-p" onclick="mpPaso3()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MP — PASO 3: FÁBRICA + LOTES -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-mp3" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Fábrica y lotes</div><div class="hdr-sub">Paso 3 de 4</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div></div>
+    <div class="sep"></div>
+    <p style="font-size:14px;color:var(--tx2);margin-bottom:14px;">¿A qué fábrica ingresó esta materia prima?</p>
+    <div class="op-grid op-grid-1" style="margin-bottom:18px;">
+      <div class="op-btn" id="mp-fab-cba" onclick="selFabrica('Córdoba')"><div class="op-icon">🏭</div><div class="op-label">Fábrica Córdoba</div></div>
+      <div class="op-btn" id="mp-fab-ros" onclick="selFabrica('Rosario')"><div class="op-icon">🏭</div><div class="op-label">Fábrica Rosario</div></div>
+      <div class="op-btn" id="mp-fab-men" onclick="selFabrica('Mengui')"><div class="op-icon">🏪</div><div class="op-label">Mengui</div></div>
+    </div>
+    <div class="div"></div>
+    <p style="font-size:14px;font-weight:bold;color:var(--tx);margin-bottom:6px;">Lotes</p>
+    <p class="tsm" style="margin-bottom:12px;">¿Cuántos lotes distintos trae esta entrega?</p>
+    <div class="flex gap8" style="margin-bottom:14px;">
+      <button class="btn btn-sm btn-s f1" onclick="cambiarLotes(-1)">−</button>
+      <div style="background:var(--bg2);border-radius:10px;padding:10px 20px;font-size:18px;font-weight:bold;color:var(--marron);text-align:center;min-width:60px;" id="lotes-count">1</div>
+      <button class="btn btn-sm btn-s f1" onclick="cambiarLotes(1)">+</button>
+    </div>
+    <div id="lotes-inputs"></div>
+    <button class="btn btn-p" onclick="mpPaso4()">Continuar →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MP — PASO 4: CONFIRMACIÓN -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-mp4" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div><div class="hdr-title">Confirmar ingreso</div><div class="hdr-sub">Paso 4 de 4</div></div>
+  </div>
+  <div class="body">
+    <div class="steps"><div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div></div>
+    <div class="sep"></div>
+    <div class="card">
+      <div id="mp-resumen"></div>
+    </div>
+    <div class="sep"></div>
+    <button class="btn btn-v" onclick="confirmarMP()">✓ Confirmar y guardar</button>
+    <div class="sep"></div>
+    <button class="btn btn-s" onclick="goBack()">← Corregir algo</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- PANEL PABLO -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-pablo" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div class="hdr-title">Panel de revisión</div>
+    <button class="btn btn-sm btn-s" onclick="exportarExcel()" style="margin-left:auto;font-size:12px;">📥 Excel</button>
+  </div>
+  <div class="body body-sm">
+    <div class="filtros-bar">
+      <div class="filtros-row" id="filtros-tipo">
+        <button class="filtro-btn active" onclick="setFiltro('tipo','todos',this)">Todos</button>
+        <button class="filtro-btn" onclick="setFiltro('tipo','gasto',this)">Gastos</button>
+        <button class="filtro-btn" onclick="setFiltro('tipo','mp',this)">Mat. Prima</button>
+      </div>
+      <div class="div" style="margin:10px 0 8px;"></div>
+      <div class="filtros-row" id="filtros-estado">
+        <button class="filtro-btn active" onclick="setFiltro('estado','todos',this)">Todos</button>
+        <button class="filtro-btn" onclick="setFiltro('estado','pendiente',this)">⚠️ Sin categoría</button>
+        <button class="filtro-btn" onclick="setFiltro('estado','anulado',this)">🚫 Anulados</button>
+      </div>
+    </div>
+    <div id="pablo-stats" class="card card-sm" style="margin-bottom:12px;"></div>
+    <div id="pablo-lista"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ADMIN -->
+<!-- ══════════════════════════════════════ -->
+<div id="sc-admin" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="goBack()">←</button>
+    <div class="hdr-title">Administración</div>
+  </div>
+  <div class="body">
+    <button class="mod-btn" onclick="showAdminSec('usuarios')" style="border-color:var(--azul);">
+      <div class="mod-icon">👥</div><div class="mod-title">Usuarios</div><div class="mod-sub">Agregar o desactivar usuarios</div>
+    </button>
+    <button class="mod-btn" onclick="showAdminSec('vehiculos')" style="border-color:var(--naranja);">
+      <div class="mod-icon">🚗</div><div class="mod-title">Vehículos</div><div class="mod-sub">Nombre, sobrenombre, patente, marca</div>
+    </button>
+    <button class="mod-btn" onclick="showAdminSec('categorias')" style="border-color:var(--verde);">
+      <div class="mod-icon">🏷️</div><div class="mod-title">Categorías de gasto</div><div class="mod-sub">Agregar o editar categorías</div>
+    </button>
+    <button class="mod-btn" onclick="showAdminSec('proveedores')" style="border-color:var(--amarillo);">
+      <div class="mod-icon">🏪</div><div class="mod-title">Proveedores</div><div class="mod-sub">Lista de proveedores y sus productos</div>
+    </button>
+  </div>
+</div>
+
+<!-- Admin: Usuarios -->
+<div id="sc-adm-usuarios" class="screen">
+  <div class="hdr"><button class="hdr-back" onclick="goBack()">←</button><div class="hdr-title">Usuarios</div></div>
+  <div class="body">
+    <button class="btn btn-p" onclick="openMo('mo-user')" style="margin-bottom:14px;">+ Agregar usuario</button>
+    <div id="lista-usuarios"></div>
+  </div>
+</div>
+
+<!-- Admin: Vehículos -->
+<div id="sc-adm-vehiculos" class="screen">
+  <div class="hdr"><button class="hdr-back" onclick="goBack()">←</button><div class="hdr-title">Vehículos</div></div>
+  <div class="body">
+    <button class="btn btn-p" onclick="openMo('mo-vehiculo')" style="margin-bottom:14px;">+ Agregar vehículo</button>
+    <div id="lista-vehiculos"></div>
+  </div>
+</div>
+
+<!-- Admin: Categorías -->
+<div id="sc-adm-categorias" class="screen">
+  <div class="hdr"><button class="hdr-back" onclick="goBack()">←</button><div class="hdr-title">Categorías de gasto</div></div>
+  <div class="body">
+    <button class="btn btn-p" onclick="openMo('mo-cat')" style="margin-bottom:14px;">+ Agregar categoría</button>
+    <div id="lista-cats"></div>
+  </div>
+</div>
+
+<!-- Admin: Proveedores -->
+<div id="sc-adm-proveedores" class="screen">
+  <div class="hdr"><button class="hdr-back" onclick="goBack()">←</button><div class="hdr-title">Proveedores</div></div>
+  <div class="body">
+    <button class="btn btn-p" onclick="openMo('mo-prov')" style="margin-bottom:14px;">+ Agregar proveedor</button>
+    <div id="lista-proveedores"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODALES -->
+<!-- ══════════════════════════════════════ -->
+<div id="mo-user" class="modal-bg" onclick="closeMoIf(event,'mo-user')">
+  <div class="modal">
+    <div class="modal-title">Nuevo usuario</div>
+    <div class="fg"><label class="fl">Nombre completo</label><input class="fc" id="nu-nombre" placeholder="Ej: Juan Pérez"></div>
+    <div class="fg"><label class="fl">Email</label><input class="fc" type="email" id="nu-email" placeholder="juan@nuss.com"></div>
+    <div class="fg"><label class="fl">Contraseña</label><input class="fc" type="password" id="nu-pass" placeholder="Mínimo 6 caracteres"></div>
+    <div class="fg"><label class="fl">Rol</label>
+      <select class="fc" id="nu-rol"><option value="usuario">Usuario (carga gastos)</option><option value="pablo">Revisor (panel completo)</option><option value="admin">Admin</option></select>
+    </div>
+    <button class="btn btn-p" onclick="guardarUsuario()">Guardar</button>
+    <div class="sep"></div>
+    <button class="btn btn-s" onclick="closeMo('mo-user')">Cancelar</button>
+  </div>
+</div>
+
+<div id="mo-vehiculo" class="modal-bg" onclick="closeMoIf(event,'mo-vehiculo')">
+  <div class="modal">
+    <div class="modal-title">Nuevo vehículo</div>
+    <div class="fg"><label class="fl">Sobrenombre (cómo lo llaman)</label><input class="fc" id="nv-snombre" placeholder="Ej: La Hilux, El Fiat..."></div>
+    <div class="fg"><label class="fl">Nombre completo</label><input class="fc" id="nv-nombre" placeholder="Ej: Toyota Hilux 2020"></div>
+    <div class="fg"><label class="fl">Marca</label><input class="fc" id="nv-marca" placeholder="Ej: Toyota"></div>
+    <div class="fg"><label class="fl">Patente</label><input class="fc" id="nv-patente" placeholder="Ej: AB123CD" style="text-transform:uppercase;"></div>
+    <div class="fg"><label class="fl">Pertenece a</label>
+      <select class="fc" id="nv-owner"><option value="empresa">Empresa</option><option value="socio">Socio / Personal</option></select>
+    </div>
+    <button class="btn btn-p" onclick="guardarVehiculo()">Guardar</button>
+    <div class="sep"></div>
+    <button class="btn btn-s" onclick="closeMo('mo-vehiculo')">Cancelar</button>
+  </div>
+</div>
+
+<div id="mo-cat" class="modal-bg" onclick="closeMoIf(event,'mo-cat')">
+  <div class="modal">
+    <div class="modal-title">Nueva categoría</div>
+    <div class="fg"><label class="fl">Nombre</label><input class="fc" id="nc-nombre" placeholder="Ej: Limpieza"></div>
+    <div class="fg"><label class="fl">Ícono (emoji)</label><input class="fc" id="nc-icon" placeholder="Ej: 🧹" maxlength="4"></div>
+    <button class="btn btn-p" onclick="guardarCategoria()">Guardar</button>
+    <div class="sep"></div>
+    <button class="btn btn-s" onclick="closeMo('mo-cat')">Cancelar</button>
+  </div>
+</div>
+
+<div id="mo-prov" class="modal-bg" onclick="closeMoIf(event,'mo-prov')">
+  <div class="modal">
+    <div class="modal-title">Nuevo proveedor</div>
+    <div class="fg"><label class="fl">Nombre del proveedor</label><input class="fc" id="np-nombre" placeholder="Ej: DIMAFLO"></div>
+    <div class="fg"><label class="fl">Producto habitual</label>
+      <select class="fc" id="np-producto">
+        <option value="">No especificado</option>
+        <option>Harina</option><option>Azúcar</option><option>Grasa</option>
+        <option>Lecitina</option><option>Colorante</option><option>Bicarbonato</option>
+        <option>Fécula</option><option>Cacao</option>
+      </select>
+    </div>
+    <button class="btn btn-p" onclick="guardarProveedor()">Guardar</button>
+    <div class="sep"></div>
+    <button class="btn btn-s" onclick="closeMo('mo-prov')">Cancelar</button>
+  </div>
+</div>
+
+<div id="mo-editar" class="modal-bg" onclick="closeMoIf(event,'mo-editar')">
+  <div class="modal">
+    <div class="modal-title">Editar registro</div>
+    <div class="fg"><label class="fl">Categoría</label><select class="fc" id="ed-cat"></select></div>
+    <div class="fg"><label class="fl">Destino</label><select class="fc" id="ed-dest"></select></div>
+    <div class="fg"><label class="fl">Nota</label><input class="fc" id="ed-nota" placeholder="Observación opcional"></div>
+    <button class="btn btn-p" onclick="guardarEdicion()">Guardar cambios</button>
+    <div class="sep"></div>
+    <button class="btn btn-r" onclick="anularRegistro()">🚫 Anular registro</button>
+    <div class="sep"></div>
+    <button class="btn btn-s" onclick="closeMo('mo-editar')">Cancelar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════════
+function getPeriodo(fecha){
+  if(!fecha) return '';
+  const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const d = new Date(fecha+'T12:00:00');
+  return meses[d.getMonth()]+'-'+String(d.getFullYear()).slice(2);
+}
+
+// API key moved to Apps Script for security
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwXiQgRAZkXE4PohR0k3Wx8UxpI_NS0eWkXd1ARGrMHKjgLjPt2XlQcM7Ut600pomGndQ/exec';
+
+const DESTINOS = [
+  {id:'cordoba',  label:'Fábrica Córdoba', icon:'🏭'},
+  {id:'rosario',  label:'Fábrica Rosario', icon:'🏭'},
+  {id:'taller',   label:'Taller',          icon:'🔧'},
+  {id:'mengui',   label:'Mengui',          icon:'🏪'},
+  {id:'vehiculo', label:'Vehículo',        icon:'🚗'},
+  {id:'casa',     label:'Casa',            icon:'🏠'},
+  {id:'otro',     label:'Otro',            icon:'📦'},
+];
+
+const CATS_DEFAULT = [
+  {id:'combustible',   label:'Combustible',   icon:'⛽'},
+  {id:'repuestos',     label:'Repuestos',     icon:'🔩'},
+  {id:'insumos',       label:'Insumos',       icon:'📦'},
+  {id:'servicios',     label:'Servicios',     icon:'💼'},
+  {id:'inversion',     label:'Inversión',     icon:'📈'},
+  {id:'fletes',        label:'Fletes',        icon:'🚛'},
+  {id:'limpieza',      label:'Limpieza',      icon:'🧹'},
+  {id:'mantenimiento', label:'Mantenimiento', icon:'🛠️'},
+  {id:'otros',         label:'Otros',         icon:'📌'},
+];
+
+let DB = loadDB();
+let CU = null; // current user
+let GD = {};   // gasto en curso
+let MPD = {};  // mp en curso
+let navStack = [];
+let filtros = {tipo:'todos', estado:'todos'};
+let editIdx = null;
+let mpLotes = 1;
+let mpFabrica = '';
+let fotoBase64 = {gasto: null, mp: null};
+
+function loadDB(){
+  try { return JSON.parse(localStorage.getItem('nuss_gastos')||'null') || initDB(); }
+  catch(e){ return initDB(); }
+}
+function initDB(){
+  return {
+    usuarios:[
+      {id:'u1', nombre:'Pablo Zavarrena', email:'pablo@nuss.com', pass:'Pablito2021.', rol:'pablo', activo:true},
+      {id:'u2', nombre:'Tomás Zavarrena', email:'tomas@nuss.com', pass:'Tomas2021.', rol:'admin', activo:true},
+      {id:'u3', nombre:'Federico Silva', email:'fede@nuss.com', pass:'Fede2021', rol:'usuario', activo:true},
+    ],
+    vehiculos:[
+      {id:'v1', snombre:'La Hilux', nombre:'Toyota Hilux 2020', marca:'Toyota', patente:'AB123CD', owner:'empresa'},
+      {id:'v2', snombre:'El Kangoo', nombre:'Renault Kangoo 2018', marca:'Renault', patente:'XY789ZW', owner:'empresa'},
+    ],
+    categorias:[...CATS_DEFAULT],
+    proveedores:[
+      {id:'p1', nombre:'DIMAFLO', producto:'Harina'},
+      {id:'p2', nombre:'Corone', producto:'Azúcar'},
+      {id:'p3', nombre:'La Cordobesa', producto:'Grasa'},
+      {id:'p4', nombre:'Nicco', producto:'Lecitina'},
+      {id:'p5', nombre:'YPF', producto:''},
+    ],
+    registros:[],
+    syncQueue:[],
+  };
+}
+function save(){ localStorage.setItem('nuss_gastos', JSON.stringify(DB)); }
+
+// ══════════════════════════════════════════════
+// NAVEGACION
+// ══════════════════════════════════════════════
+function showSc(id, push=true){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(push) navStack.push(id);
+  window.scrollTo(0,0);
+}
+function goBack(){
+  navStack.pop();
+  const prev = navStack[navStack.length-1];
+  if(prev){ showSc(prev, false); } else { showSc('sc-inicio', false); navStack=['sc-inicio']; }
+}
+
+// ══════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════
+function doLogin(){
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  const user = DB.usuarios.find(u=>u.email.toLowerCase()===email && u.pass===pass && u.activo);
+  if(!user){ toast('Email o contraseña incorrectos','err'); return; }
+  CU = user;
+  document.getElementById('user-av').textContent = user.nombre[0].toUpperCase();
+  document.getElementById('user-nm').textContent = user.nombre.split(' ')[0];
+  navStack = ['sc-inicio'];
+  showSc('sc-inicio', false);
+  renderHist();
+  toast(`Bienvenido, ${user.nombre.split(' ')[0]} 👋`,'ok');
+}
+
+// ══════════════════════════════════════════════
+// HISTORIAL
+// ══════════════════════════════════════════════
+function renderHist(){
+  const el = document.getElementById('hist-list');
+  const regs = DB.registros.filter(r=> CU.rol==='admin'||CU.rol==='pablo' ? true : r.userId===CU.id)
+    .filter(r=>r.estado!=='anulado').slice(-5).reverse();
+  if(!regs.length){ el.innerHTML='<p class="tsm txt-c" style="padding:20px 0;">No hay registros aún.</p>'; return; }
+  el.innerHTML = regs.map(r=>`
+    <div class="hist-item">
+      <div class="hist-icon">${r.tipo==='gasto'?'💸':'📦'}</div>
+      <div class="hist-info">
+        <div class="hist-title">${r.local||r.proveedor||'Sin nombre'}</div>
+        <div class="hist-sub">${r.fecha||''} · ${r.destino_label||r.fabrica||''}</div>
+      </div>
+      <div class="hist-monto">
+        <div class="monto">${formatMonto(r.importe||r.precio, r.moneda)}</div>
+        <div class="moneda"><span class="tag ${r.categoria?'tag-ok':'tag-pend'}">${r.categoria||'Sin cat.'}</span></div>
+      </div>
+    </div>`).join('');
+}
+function formatMonto(v, m){
+  if(!v) return '-';
+  const n = parseFloat(v);
+  return m==='USD' ? `US$${n.toFixed(2)}` : `$${n.toLocaleString('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0})}`;
+}
+
+// ══════════════════════════════════════════════
+// GASTO — FLUJO
+// ══════════════════════════════════════════════
+function setTipoDoc(tipo){
+  GD.tipo_doc = tipo;
+  document.getElementById('btn-factura').className = tipo==='FACTURA'?'btn btn-sm btn-p':'btn btn-sm btn-s';
+  document.getElementById('btn-remito').className = tipo==='REMITO'?'btn btn-sm btn-p':'btn btn-sm btn-s';
+  document.getElementById('btn-factura').style.flex='1';
+  document.getElementById('btn-remito').style.flex='1';
+}
+
+function iniciarGasto(){
+  GD = {tipo_doc:'FACTURA', items:[]};
+  fotoBase64.gasto = null;
+  navStack = ['sc-inicio'];
+  showSc('sc-g1');
+  ['g-local','g-fecha','g-importe','g-desc'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('g-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('foto-preview-g').style.display='none';
+  const ep=document.getElementById('items-preview-g'); if(ep)ep.remove();
+  setTipoDoc('FACTURA');
+}
+
+function gPaso3(){
+  const local = document.getElementById('g-local').value.trim();
+  const fecha = document.getElementById('g-fecha').value;
+  const importe = document.getElementById('g-importe').value;
+  if(!local||!fecha||!importe){ toast('Completá todos los campos obligatorios','err'); return; }
+  GD.local = local;
+  GD.fecha = fecha;
+  GD.importe = parseFloat(importe);
+  GD.moneda = document.getElementById('g-moneda').value;
+  GD.desc = document.getElementById('g-desc').value.trim();
+  renderDestinos();
+  showSc('sc-g3');
+}
+
+function renderDestinos(){
+  const el = document.getElementById('destinos-grid');
+  el.innerHTML = DESTINOS.map(d=>`
+    <div class="op-btn" onclick="selDestino('${d.id}','${d.label}')">
+      <div class="op-icon">${d.icon}</div>
+      <div class="op-label">${d.label}</div>
+    </div>`).join('');
+}
+
+function selDestino(id, label){
+  GD.destino = id;
+  GD.destino_label = label;
+  if(id==='vehiculo'){
+    renderVehiculos();
+    document.getElementById('vehiculos-list').style.display='block';
+  } else {
+    document.getElementById('vehiculos-list').style.display='none';
+    GD.vehiculo = null;
+    renderCats();
+    showSc('sc-g4');
+  }
+}
+
+function renderVehiculos(){
+  const el = document.getElementById('vehiculos-grid');
+  el.innerHTML = DB.vehiculos.map(v=>`
+    <div class="op-btn op-btn-info" onclick="selVehiculo('${v.id}','${v.snombre}')">
+      <button class="info-btn" onclick="event.stopPropagation();showTooltip(this,'${v.nombre} · ${v.marca} · ${v.patente}')">i</button>
+      <div class="op-icon">🚗</div>
+      <div class="op-label">${v.snombre}</div>
+      <div class="op-sub">${v.owner==='empresa'?'Empresa':'Personal'}</div>
+    </div>`).join('');
+}
+
+function selVehiculo(id, label){
+  GD.vehiculo_id = id;
+  GD.vehiculo_label = label;
+  renderCats();
+  showSc('sc-g4');
+}
+
+function renderCats(){
+  const el = document.getElementById('cats-grid');
+  el.innerHTML = DB.categorias.map(c=>`
+    <div class="op-btn" onclick="selCat('${c.id}','${c.label}')">
+      <div class="op-icon">${c.icon}</div>
+      <div class="op-label">${c.label}</div>
+    </div>`).join('');
+}
+
+function selCat(id, label){
+  GD.cat_id = id;
+  GD.categoria = label;
+  renderResumenGasto();
+  showSc('sc-g5');
+}
+
+function renderResumenGasto(){
+  const el = document.getElementById('gasto-resumen');
+  const rows = [
+    ['Tipo documento', GD.tipo_doc||'FACTURA'],
+    ['Local / Proveedor', GD.local],
+    ['Fecha', GD.fecha],
+    ['Período', getPeriodo(GD.fecha)],
+    ['Importe total', formatMonto(GD.importe, GD.moneda)],
+    ['Destino', GD.destino_label],
+    ['Vehículo', GD.vehiculo_label||'NO'],
+    ['Categoría', GD.categoria],
+    GD.items&&GD.items.length ? ['Ítems ('+GD.items.length+')', GD.items.map(it=>`${it.cant>1?it.cant+'x ':''} ${it.desc}`).join(', ')] : null,
+    GD.desc&&!GD.items?.length ? ['Descripción', GD.desc] : null,
+  ].filter(Boolean);
+  el.innerHTML = rows.map(r=>`
+    <div class="resumen-row">
+      <span class="resumen-label">${r[0]}</span>
+      <span class="resumen-val">${r[1]}</span>
+    </div>`).join('');
+}
+
+function confirmarGasto(){
+  const reg = {
+    id: 'g-'+Date.now(),
+    tipo: 'gasto',
+    userId: CU.id,
+    userName: CU.nombre,
+    estado: 'ok',
+    periodo: getPeriodo(GD.fecha),
+    foto: fotoBase64.gasto ? '[foto adjunta]' : null,
+    vehiculo_label: GD.vehiculo_label||'NO',
+    items_detalle: (GD.items||[]).map(it=>`${it.cant>1?it.cant+'x ':''} ${it.desc} $${it.subtotal||it.precio_unit||0}`).join(' | '),
+    ...GD,
+    creadoEn: new Date().toISOString(),
+  };
+  DB.registros.push(reg);
+  DB.syncQueue.push(reg);
+  save();
+  syncRegistro(reg);
+  toast('Gasto guardado ✓','ok');
+  navStack = ['sc-inicio'];
+  showSc('sc-inicio', false);
+  renderHist();
+}
+
+// ══════════════════════════════════════════════
+// MATERIA PRIMA — FLUJO
+// ══════════════════════════════════════════════
+function iniciarMP(){
+  MPD = {};
+  fotoBase64.mp = null;
+  mpLotes = 1;
+  mpFabrica = '';
+  navStack = ['sc-inicio'];
+  showSc('sc-mp1');
+  document.getElementById('mp-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('foto-preview-mp').style.display='none';
+  renderLotesInputs();
+  actualizarProvDatalist();
+}
+
+document.getElementById('mp-producto')?.addEventListener('change', function(){
+  document.getElementById('mp-otro-wrap').style.display = this.value==='Otro'?'block':'none';
+});
+
+function mpPaso3(){
+  const prov = document.getElementById('mp-prov').value.trim();
+  const prod = document.getElementById('mp-producto').value;
+  const cant = document.getElementById('mp-cant').value;
+  if(!prov||!prod||!cant){ toast('Completá todos los campos obligatorios','err'); return; }
+  MPD.proveedor = prov;
+  MPD.producto = prod==='Otro' ? document.getElementById('mp-otro').value.trim() : prod;
+  MPD.cantidad = parseFloat(cant);
+  MPD.unidad = document.getElementById('mp-unidad').value;
+  MPD.precio = parseFloat(document.getElementById('mp-precio').value)||0;
+  MPD.moneda = document.getElementById('mp-moneda').value;
+  MPD.fecha = document.getElementById('mp-fecha').value;
+  // Aprender proveedor
+  if(!DB.proveedores.find(p=>p.nombre.toLowerCase()===prov.toLowerCase())){
+    DB.proveedores.push({id:'p'+Date.now(), nombre:prov, producto:''});
+    save();
+  }
+  // Reset fábrica selección
+  ['mp-fab-cba','mp-fab-ros','mp-fab-men'].forEach(id=>document.getElementById(id).classList.remove('sel'));
+  showSc('sc-mp3');
+}
+
+function selFabrica(fab){
+  mpFabrica = fab;
+  ['mp-fab-cba','mp-fab-ros','mp-fab-men'].forEach(id=>document.getElementById(id).classList.remove('sel'));
+  const map = {'Córdoba':'mp-fab-cba','Rosario':'mp-fab-ros','Mengui':'mp-fab-men'};
+  document.getElementById(map[fab])?.classList.add('sel');
+}
+
+function cambiarLotes(d){
+  mpLotes = Math.max(1, Math.min(10, mpLotes+d));
+  document.getElementById('lotes-count').textContent = mpLotes;
+  renderLotesInputs();
+}
+
+function renderLotesInputs(){
+  const el = document.getElementById('lotes-inputs');
+  el.innerHTML = Array.from({length:mpLotes},(_,i)=>`
+    <div class="lote-input-row">
+      <div class="lote-num">${i+1}</div>
+      <input class="fc f1" type="text" id="lote-${i}" placeholder="Código de lote (o dejar vacío)">
+    </div>`).join('');
+}
+
+function mpPaso4(){
+  if(!mpFabrica){ toast('Seleccioná la fábrica','err'); return; }
+  MPD.fabrica = mpFabrica;
+  MPD.lotes = Array.from({length:mpLotes},(_,i)=>{
+    const v = document.getElementById(`lote-${i}`)?.value.trim();
+    return v || `AUTO-${Date.now()}-${i+1}`;
+  });
+  renderResumenMP();
+  showSc('sc-mp4');
+}
+
+function renderResumenMP(){
+  const el = document.getElementById('mp-resumen');
+  const rows = [
+    ['Proveedor', MPD.proveedor],
+    ['Producto', MPD.producto],
+    ['Cantidad', `${MPD.cantidad} ${MPD.unidad}`],
+    MPD.precio ? ['Precio total', formatMonto(MPD.precio, MPD.moneda)] : null,
+    ['Fecha', MPD.fecha],
+    ['Fábrica', MPD.fabrica],
+    ['Lotes', MPD.lotes.join(', ')],
+  ].filter(Boolean);
+  el.innerHTML = rows.map(r=>`
+    <div class="resumen-row">
+      <span class="resumen-label">${r[0]}</span>
+      <span class="resumen-val">${r[1]}</span>
+    </div>`).join('');
+}
+
+function confirmarMP(){
+  const reg = {
+    id: 'mp-'+Date.now(),
+    tipo: 'mp',
+    userId: CU.id,
+    userName: CU.nombre,
+    estado: 'ok',
+    periodo: getPeriodo(MPD.fecha),
+    foto: fotoBase64.mp ? '[foto adjunta]' : null,
+    categoria: MPD.producto,
+    ...MPD,
+    creadoEn: new Date().toISOString(),
+  };
+  DB.registros.push(reg);
+  DB.syncQueue.push(reg);
+  save();
+  syncRegistro(reg);
+  toast('Ingreso guardado ✓','ok');
+  navStack = ['sc-inicio'];
+  showSc('sc-inicio', false);
+  renderHist();
+}
+
+// ══════════════════════════════════════════════
+// OCR CON CLAUDE API
+// ══════════════════════════════════════════════
+function tomarFoto(tipo){
+  document.getElementById(tipo==='gasto'?'foto-gasto':'foto-mp').click();
+}
+
+async function procesarFoto(tipo){
+  const input = document.getElementById(tipo==='gasto'?'foto-gasto':'foto-mp');
+  const file = input.files[0];
+  if(!file) return;
+
+  const base64 = await fileToBase64(file);
+  fotoBase64[tipo] = base64;
+
+  const prevEl = document.getElementById(`foto-preview-${tipo}`);
+  const imgEl = document.getElementById(`foto-img-${tipo}`);
+  const statusEl = document.getElementById(`ocr-status-${tipo}`);
+  imgEl.src = `data:${file.type};base64,${base64}`;
+  prevEl.style.display = 'block';
+  statusEl.textContent = '🤖 Leyendo el documento con IA...';
+
+  const nextSc = tipo==='gasto' ? 'sc-g2m' : 'sc-mp2';
+  showSc(nextSc);
+
+  try {
+    const prompt = tipo==='gasto'
+      ? `Analiza este ticket o factura. Determina si es FACTURA o REMITO. Extrae: nombre del local/proveedor, fecha (formato YYYY-MM-DD), moneda (ARS o USD), y todos los items con descripcion, cantidad, precio unitario y subtotal. Si no puedes determinar si es factura o remito, pon tipo_doc como CONSULTAR. Responde SOLO con JSON sin texto adicional: {"tipo_doc":"FACTURA","local":"","fecha":"","moneda":"ARS","items":[{"desc":"","cant":1,"precio_unit":0,"subtotal":0}],"total":0}`
+      : `Analiza esta factura o remito de materia prima. Determina si es FACTURA o REMITO. Extrae: nombre del proveedor, lista de productos con descripcion, cantidad, unidad y precio unitario si tiene, precio total si tiene, moneda (ARS o USD), fecha (formato YYYY-MM-DD). Responde SOLO con JSON sin texto adicional: {"tipo_doc":"FACTURA","proveedor":"","fecha":"","moneda":"ARS","items":[{"producto":"","cantidad":0,"unidad":"kg","precio_unit":0}],"total":0}`;
+
+    const res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'ocrFoto',
+        imageBase64: base64,
+        imageType: file.type,
+        tipo: tipo,
+        prompt: prompt
+      })
+    });
+    const data = await res.json();
+    if(!data.resultado) throw new Error('Sin resultado');
+    const clean = data.resultado.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+
+    if(tipo==='gasto'){
+      if(parsed.local) document.getElementById('g-local').value = parsed.local;
+      if(parsed.fecha) document.getElementById('g-fecha').value = parsed.fecha;
+      if(parsed.total) document.getElementById('g-importe').value = parsed.total;
+      if(parsed.moneda) document.getElementById('g-moneda').value = parsed.moneda;
+      // Guardar items y tipo_doc en GD
+      GD.items = parsed.items||[];
+      GD.tipo_doc = parsed.tipo_doc||'FACTURA';
+      // Mostrar items extraídos
+      if(parsed.items&&parsed.items.length){
+        const itemsHtml = parsed.items.map(it=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg2);font-size:12px;"><span>${it.desc}</span><span style="color:var(--marron);font-weight:bold;">${it.cant>1?it.cant+'× ':''}\$${(it.subtotal||it.precio_unit||0).toLocaleString('es-AR')}</span></div>`).join('');
+        document.getElementById('g-desc').value = parsed.items.map(it=>`${it.cant>1?it.cant+'x ':''} ${it.desc}`).join(' | ');
+        // Insert items preview
+        const existing = document.getElementById('items-preview-g');
+        if(existing) existing.remove();
+        const div = document.createElement('div');
+        div.id='items-preview-g';
+        div.style.cssText='background:var(--bg2);border-radius:10px;padding:10px;margin-bottom:10px;';
+        div.innerHTML='<div style="font-size:11px;font-weight:bold;color:var(--tx2);margin-bottom:6px;">ÍTEMS DETECTADOS</div>'+itemsHtml;
+        document.getElementById('g-desc').parentElement.insertAdjacentElement('beforebegin',div);
+      }
+      // Preguntar si tipo_doc es CONSULTAR
+      if(parsed.tipo_doc==='CONSULTAR'){
+        statusEl.innerHTML=`⚠️ ¿Es factura o remito? <button class="btn btn-xs btn-s" onclick="GD.tipo_doc='FACTURA';this.parentElement.textContent='FACTURA'">Factura</button> <button class="btn btn-xs btn-s" onclick="GD.tipo_doc='REMITO';this.parentElement.textContent='REMITO'">Remito</button>`;
+      } else {
+        statusEl.textContent = '✅ IA extrajo los datos ('+parsed.tipo_doc+'). Revisá y corregí si hace falta.';
+      }
+    } else {
+      if(parsed.proveedor) document.getElementById('mp-prov').value = parsed.proveedor;
+      if(parsed.producto){
+        const sel = document.getElementById('mp-producto');
+        const opts = [...sel.options].map(o=>o.value.toLowerCase());
+        if(opts.includes(parsed.producto.toLowerCase())) sel.value = parsed.producto;
+      }
+      if(parsed.cantidad) document.getElementById('mp-cant').value = parsed.cantidad;
+      if(parsed.unidad) document.getElementById('mp-unidad').value = parsed.unidad;
+      if(parsed.precio) document.getElementById('mp-precio').value = parsed.precio;
+      if(parsed.moneda) document.getElementById('mp-moneda').value = parsed.moneda;
+      if(parsed.fecha) document.getElementById('mp-fecha').value = parsed.fecha;
+      // Autocompletar proveedor conocido
+      const provConocido = DB.proveedores.find(p=>p.nombre.toLowerCase()===parsed.proveedor?.toLowerCase());
+      if(provConocido?.producto){
+        const sel = document.getElementById('mp-producto');
+        const opts = [...sel.options].map(o=>o.value.toLowerCase());
+        if(opts.includes(provConocido.producto.toLowerCase())) sel.value = provConocido.producto;
+      }
+      statusEl.textContent = '✅ IA extrajo los datos. Revisá y corregí si hace falta.';
+    }
+  } catch(err){
+    statusEl.textContent = '⚠️ No se pudieron extraer los datos automáticamente. Completá a mano.';
+  }
+  input.value = '';
+}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(r.result.split(',')[1]);
+    r.onerror = ()=>rej();
+    r.readAsDataURL(file);
+  });
+}
+
+// ══════════════════════════════════════════════
+// PANEL PABLO
+// ══════════════════════════════════════════════
+function showPablo(){
+  renderPablo();
+  showSc('sc-pablo');
+}
+
+function setFiltro(tipo, val, btn){
+  filtros[tipo] = val;
+  const container = btn.closest('.filtros-row');
+  container.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPablo();
+}
+
+function renderPablo(){
+  let regs = DB.registros;
+  if(CU?.rol==='usuario') regs = regs.filter(r=>r.userId===CU.id);
+  if(filtros.tipo!=='todos') regs = regs.filter(r=>r.tipo===filtros.tipo);
+  if(filtros.estado==='pendiente') regs = regs.filter(r=>!r.categoria||r.categoria==='');
+  if(filtros.estado==='anulado') regs = regs.filter(r=>r.estado==='anulado');
+
+  // Stats
+  const totalARS = regs.filter(r=>r.moneda!=='USD'&&r.estado!=='anulado').reduce((a,r)=>a+(parseFloat(r.importe||r.precio)||0),0);
+  const totalUSD = regs.filter(r=>r.moneda==='USD'&&r.estado!=='anulado').reduce((a,r)=>a+(parseFloat(r.importe||r.precio)||0),0);
+  const sinCat = regs.filter(r=>(!r.categoria||r.categoria==='')&&r.estado!=='anulado').length;
+  document.getElementById('pablo-stats').innerHTML = `
+    <div class="flex gap8" style="flex-wrap:wrap;">
+      <div style="flex:1;min-width:100px;"><div class="tsm">Total ARS</div><div style="font-size:16px;font-weight:bold;color:var(--marron);">${formatMonto(totalARS,'ARS')}</div></div>
+      ${totalUSD>0?`<div style="flex:1;min-width:100px;"><div class="tsm">Total USD</div><div style="font-size:16px;font-weight:bold;color:var(--azul);">${formatMonto(totalUSD,'USD')}</div></div>`:''}
+      ${sinCat>0?`<div style="flex:1;min-width:100px;"><div class="tsm">Sin categoría</div><div style="font-size:16px;font-weight:bold;color:var(--rojo);">${sinCat} registros</div></div>`:''}
+    </div>`;
+
+  // Lista
+  const el = document.getElementById('pablo-lista');
+  if(!regs.length){ el.innerHTML='<p class="tsm txt-c" style="padding:20px 0;">No hay registros con estos filtros.</p>'; return; }
+  el.innerHTML = regs.slice().reverse().map((r,i)=>`
+    <div class="hist-item" style="${r.estado==='anulado'?'opacity:.5;':''}">
+      <div class="hist-icon">${r.tipo==='gasto'?'💸':'📦'}</div>
+      <div class="hist-info">
+        <div class="hist-title">${r.local||r.proveedor||'Sin nombre'}</div>
+        <div class="hist-sub">${r.fecha||''} · ${r.userName||''}</div>
+        <div class="hist-sub">${r.destino_label||r.fabrica||''} ${r.vehiculo_label?'· '+r.vehiculo_label:''}</div>
+      </div>
+      <div class="hist-monto">
+        <div class="monto">${formatMonto(r.importe||r.precio, r.moneda)}</div>
+        <div class="moneda"><span class="tag ${r.estado==='anulado'?'tag-anul':r.categoria?'tag-ok':'tag-pend'}">${r.estado==='anulado'?'Anulado':r.categoria||'Sin cat.'}</span></div>
+        ${(CU?.rol==='pablo'||CU?.rol==='admin')?`<button class="btn btn-xs btn-s" onclick="abrirEditar('${r.id}')" style="margin-top:4px;">✏️</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function abrirEditar(id){
+  editIdx = id;
+  const reg = DB.registros.find(r=>r.id===id);
+  if(!reg) return;
+  const selCat = document.getElementById('ed-cat');
+  selCat.innerHTML = DB.categorias.map(c=>`<option value="${c.label}" ${reg.categoria===c.label?'selected':''}>${c.icon} ${c.label}</option>`).join('');
+  const selDest = document.getElementById('ed-dest');
+  selDest.innerHTML = DESTINOS.map(d=>`<option value="${d.label}" ${reg.destino_label===d.label?'selected':''}>${d.icon} ${d.label}</option>`).join('');
+  document.getElementById('ed-nota').value = reg.nota||'';
+  openMo('mo-editar');
+}
+
+function guardarEdicion(){
+  const reg = DB.registros.find(r=>r.id===editIdx);
+  if(!reg) return;
+  reg.categoria = document.getElementById('ed-cat').value;
+  reg.destino_label = document.getElementById('ed-dest').value;
+  reg.nota = document.getElementById('ed-nota').value;
+  save();
+  closeMo('mo-editar');
+  renderPablo();
+  toast('Registro actualizado ✓','ok');
+}
+
+function anularRegistro(){
+  const reg = DB.registros.find(r=>r.id===editIdx);
+  if(!reg) return;
+  reg.estado = 'anulado';
+  save();
+  closeMo('mo-editar');
+  renderPablo();
+  toast('Registro anulado','ok');
+}
+
+function exportarExcel(){
+  let regs = DB.registros;
+  if(filtros.tipo!=='todos') regs = regs.filter(r=>r.tipo===filtros.tipo);
+  const csv = ['Tipo,Fecha,Local/Proveedor,Importe,Moneda,Destino,Categoría,Usuario,Estado,Lotes',
+    ...regs.map(r=>[
+      r.tipo==='gasto'?'Gasto':'Mat. Prima',
+      r.fecha||'', r.local||r.proveedor||'', r.importe||r.precio||'', r.moneda||'ARS',
+      r.destino_label||r.fabrica||'', r.categoria||'', r.userName||'', r.estado||'ok',
+      (r.lotes||[]).join('|')
+    ].map(v=>`"${v}"`).join(','))
+  ].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `nuss-gastos-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast('Exportado ✓','ok');
+}
+
+// ══════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════
+function showAdmin(){
+  if(!CU||(CU.rol!=='admin'&&CU.rol!=='pablo')){ toast('Acceso solo para administradores','err'); return; }
+  showSc('sc-admin');
+}
+
+function showAdminSec(sec){
+  if(sec==='usuarios'){ renderAdmUsuarios(); showSc('sc-adm-usuarios'); }
+  if(sec==='vehiculos'){ renderAdmVehiculos(); showSc('sc-adm-vehiculos'); }
+  if(sec==='categorias'){ renderAdmCats(); showSc('sc-adm-categorias'); }
+  if(sec==='proveedores'){ renderAdmProveedores(); showSc('sc-adm-proveedores'); }
+}
+
+function renderAdmUsuarios(){
+  document.getElementById('lista-usuarios').innerHTML = DB.usuarios.map(u=>`
+    <div class="list-item">
+      <div class="user-avatar" style="background:var(--marron);color:#fff;flex-shrink:0;">${u.nombre[0]}</div>
+      <div class="list-item-info">
+        <div class="list-item-title">${u.nombre}</div>
+        <div class="list-item-sub">${u.email} · ${u.rol}</div>
+      </div>
+      <span class="tag ${u.activo?'tag-ok':'tag-anul'}">${u.activo?'Activo':'Inactivo'}</span>
+    </div>`).join('');
+}
+
+function renderAdmVehiculos(){
+  document.getElementById('lista-vehiculos').innerHTML = DB.vehiculos.map(v=>`
+    <div class="list-item">
+      <div style="font-size:24px;">🚗</div>
+      <div class="list-item-info">
+        <div class="list-item-title">${v.snombre}</div>
+        <div class="list-item-sub">${v.nombre} · ${v.patente} · ${v.owner==='empresa'?'Empresa':'Personal'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderAdmCats(){
+  document.getElementById('lista-cats').innerHTML = DB.categorias.map(c=>`
+    <div class="list-item">
+      <div style="font-size:24px;">${c.icon}</div>
+      <div class="list-item-info"><div class="list-item-title">${c.label}</div></div>
+    </div>`).join('');
+}
+
+function renderAdmProveedores(){
+  actualizarProvDatalist();
+  document.getElementById('lista-proveedores').innerHTML = DB.proveedores.map(p=>`
+    <div class="list-item">
+      <div style="font-size:24px;">🏪</div>
+      <div class="list-item-info">
+        <div class="list-item-title">${p.nombre}</div>
+        <div class="list-item-sub">${p.producto||'Producto no especificado'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function actualizarProvDatalist(){
+  const dl = document.getElementById('prov-list');
+  if(dl) dl.innerHTML = DB.proveedores.map(p=>`<option value="${p.nombre}">`).join('');
+}
+
+// Modales guardar
+function guardarUsuario(){
+  const nombre=document.getElementById('nu-nombre').value.trim();
+  const email=document.getElementById('nu-email').value.trim();
+  const pass=document.getElementById('nu-pass').value;
+  const rol=document.getElementById('nu-rol').value;
+  if(!nombre||!email||!pass){ toast('Completá todos los campos','err'); return; }
+  if(DB.usuarios.find(u=>u.email.toLowerCase()===email.toLowerCase())){ toast('Ese email ya existe','err'); return; }
+  DB.usuarios.push({id:'u'+Date.now(),nombre,email,pass,rol,activo:true});
+  save();
+  closeMo('mo-user');
+  renderAdmUsuarios();
+  toast('Usuario creado ✓','ok');
+}
+
+function guardarVehiculo(){
+  const snombre=document.getElementById('nv-snombre').value.trim();
+  const nombre=document.getElementById('nv-nombre').value.trim();
+  const marca=document.getElementById('nv-marca').value.trim();
+  const patente=document.getElementById('nv-patente').value.trim().toUpperCase();
+  const owner=document.getElementById('nv-owner').value;
+  if(!snombre||!patente){ toast('Completá al menos sobrenombre y patente','err'); return; }
+  DB.vehiculos.push({id:'v'+Date.now(),snombre,nombre,marca,patente,owner});
+  save();
+  closeMo('mo-vehiculo');
+  renderAdmVehiculos();
+  toast('Vehículo agregado ✓','ok');
+}
+
+function guardarCategoria(){
+  const nombre=document.getElementById('nc-nombre').value.trim();
+  const icon=document.getElementById('nc-icon').value.trim()||'📌';
+  if(!nombre){ toast('Escribí un nombre','err'); return; }
+  DB.categorias.push({id:'c'+Date.now(),label:nombre,icon});
+  save();
+  closeMo('mo-cat');
+  renderAdmCats();
+  toast('Categoría agregada ✓','ok');
+}
+
+function guardarProveedor(){
+  const nombre=document.getElementById('np-nombre').value.trim();
+  const producto=document.getElementById('np-producto').value;
+  if(!nombre){ toast('Escribí el nombre del proveedor','err'); return; }
+  if(DB.proveedores.find(p=>p.nombre.toLowerCase()===nombre.toLowerCase())){ toast('Ese proveedor ya existe','err'); return; }
+  DB.proveedores.push({id:'p'+Date.now(),nombre,producto});
+  save();
+  closeMo('mo-prov');
+  renderAdmProveedores();
+  toast('Proveedor agregado ✓','ok');
+}
+
+// ══════════════════════════════════════════════
+// SYNC A SHEETS
+// ══════════════════════════════════════════════
+async function syncRegistro(reg){
+  try {
+    await fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({action: reg.tipo==='gasto'?'saveGasto':'saveMP', ...reg})
+    });
+    DB.syncQueue = DB.syncQueue.filter(r=>r.id!==reg.id);
+    save();
+  } catch(e){ /* queda en cola, reintenta después */ }
+}
+
+// ══════════════════════════════════════════════
+// TOOLTIP
+// ══════════════════════════════════════════════
+function showTooltip(btn, text){
+  document.querySelectorAll('.tooltip').forEach(t=>t.remove());
+  const tt = document.createElement('div');
+  tt.className = 'tooltip show';
+  tt.textContent = text;
+  btn.parentElement.style.position='relative';
+  btn.parentElement.appendChild(tt);
+  setTimeout(()=>tt.remove(), 2500);
+}
+
+// ══════════════════════════════════════════════
+// MODALES
+// ══════════════════════════════════════════════
+function openMo(id){ document.getElementById(id).classList.add('active'); }
+function closeMo(id){ document.getElementById(id).classList.remove('active'); }
+function closeMoIf(e,id){ if(e.target.id===id) closeMo(id); }
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+let toastTimer;
+function toast(msg, tipo=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='show'+(tipo?' '+tipo:'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.className='',2500);
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Auto-login si hay sesión guardada
+  const saved = localStorage.getItem('nuss_gastos_user');
+  if(saved){
+    const user = DB.usuarios.find(u=>u.id===saved);
+    if(user){ CU=user; document.getElementById('user-av').textContent=user.nombre[0]; document.getElementById('user-nm').textContent=user.nombre.split(' ')[0]; navStack=['sc-inicio']; showSc('sc-inicio',false); renderHist(); return; }
+  }
+});
+</script>
+</body>
+</html>
