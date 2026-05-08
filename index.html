@@ -1192,111 +1192,119 @@ function previewFoto(tipo){
 }
 
 async function procesarFoto(tipo){
-  const input = document.getElementById(tipo==='gasto'?'foto-gasto':'foto-mp');
-  const file = input.files[0];
-  if(!file) return;
+  const input=document.getElementById(tipo==='gasto'?'foto-gasto':'foto-mp');
+  const file=input.files[0];
+  if(!file)return;
 
-  const base64 = await fileToBase64(file);
-  fotoBase64[tipo] = base64;
-
-  const prevEl = document.getElementById(`foto-preview-${tipo}`);
-  const imgEl = document.getElementById(`foto-img-${tipo}`);
-  const statusEl = document.getElementById(`ocr-status-${tipo}`);
-  imgEl.src = `data:${file.type};base64,${base64}`;
-  prevEl.style.display = 'block';
-  statusEl.textContent = '🤖 Leyendo el documento con IA...';
-
-  const nextSc = tipo==='gasto' ? 'sc-g2m' : 'sc-mp2';
+  const nextSc=tipo==='gasto'?'sc-g2m':'sc-mp2';
   showSc(nextSc);
 
-  try {
-    const prompt = tipo==='gasto'
-      ? `Analiza este ticket o factura. Determina si es FACTURA o REMITO. Extrae: nombre del local/proveedor, fecha (formato YYYY-MM-DD), moneda (ARS o USD), y todos los items con descripcion, cantidad, precio unitario y subtotal. Si no puedes determinar si es factura o remito, pon tipo_doc como CONSULTAR. Responde SOLO con JSON sin texto adicional: {"tipo_doc":"FACTURA","local":"","fecha":"","moneda":"ARS","items":[{"desc":"","cant":1,"precio_unit":0,"subtotal":0}],"total":0}`
-      : `Analiza esta factura o remito de materia prima. Determina si es FACTURA o REMITO. Extrae: nombre del proveedor, lista de productos con descripcion, cantidad, unidad y precio unitario si tiene, precio total si tiene, moneda (ARS o USD), fecha (formato YYYY-MM-DD). Responde SOLO con JSON sin texto adicional: {"tipo_doc":"FACTURA","proveedor":"","fecha":"","moneda":"ARS","items":[{"producto":"","cantidad":0,"unidad":"kg","precio_unit":0}],"total":0}`;
+  const prevEl=document.getElementById('foto-preview-'+tipo);
+  const imgEl=document.getElementById('foto-img-'+tipo);
+  const statusEl=document.getElementById('ocr-status-'+tipo);
+  const confirmEl=document.getElementById(tipo==='gasto'?'foto-confirm-g':'foto-confirm-mp');
 
-    const data = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', SHEETS_URL, true);
-      xhr.setRequestHeader('Content-Type', 'text/plain');
-      xhr.onload = () => {
-        try { resolve(JSON.parse(xhr.responseText)); }
-        catch(e) { reject(new Error('Respuesta inválida')); }
+  if(prevEl)prevEl.style.display='block';
+  if(confirmEl)confirmEl.style.display='none';
+  if(statusEl)statusEl.textContent='Comprimiendo imagen...';
+
+  try{
+    const base64=await fileToBase64(file);
+    fotoBase64[tipo]=base64;
+    if(imgEl)imgEl.src='data:image/jpeg;base64,'+base64;
+    if(statusEl)statusEl.textContent='Leyendo con IA... puede tardar 10-20 seg';
+
+    const prompt=tipo==='gasto'
+      ?'Analiza este ticket o factura. Determina si es FACTURA o REMITO. Extrae: nombre del local/proveedor, fecha formato YYYY-MM-DD, moneda ARS o USD, y todos los items con descripcion, cantidad, precio unitario y subtotal. Si no puedes determinar, pon tipo_doc CONSULTAR. Responde SOLO JSON sin texto extra: {"tipo_doc":"FACTURA","local":"","fecha":"","moneda":"ARS","items":[{"desc":"","cant":1,"precio_unit":0,"subtotal":0}],"total":0}'
+      :'Analiza esta factura o remito de materia prima. Determina si es FACTURA o REMITO. Extrae: proveedor, productos con descripcion/cantidad/unidad/precio_unit, total, moneda ARS o USD, fecha YYYY-MM-DD. Responde SOLO JSON sin texto extra: {"tipo_doc":"FACTURA","proveedor":"","fecha":"","moneda":"ARS","items":[{"producto":"","cantidad":0,"unidad":"kg","precio_unit":0}],"total":0}';
+
+    const data=await new Promise((resolve,reject)=>{
+      const xhr=new XMLHttpRequest();
+      xhr.open('POST',SHEETS_URL,true);
+      xhr.setRequestHeader('Content-Type','text/plain');
+      xhr.onload=()=>{
+        try{resolve(JSON.parse(xhr.responseText));}
+        catch(e){reject(new Error('Respuesta invalida'));}
       };
-      xhr.onerror = () => reject(new Error('Error de red'));
-      xhr.ontimeout = () => reject(new Error('Tiempo agotado'));
-      xhr.timeout = 30000;
-      xhr.send(JSON.stringify({
-        action: 'ocrFoto',
-        imageBase64: base64,
-        imageType: file.type,
-        tipo: tipo,
-        prompt: prompt
-      }));
+      xhr.onerror=()=>reject(new Error('Error de red'));
+      xhr.ontimeout=()=>reject(new Error('Tiempo agotado - intentá de nuevo'));
+      xhr.timeout=45000;
+      xhr.send(JSON.stringify({action:'ocrFoto',imageBase64:base64,imageType:'image/jpeg',tipo:tipo,prompt:prompt}));
     });
-    if(!data.resultado) throw new Error(data.msg||'Sin resultado');
-    const clean = data.resultado.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(clean);
+
+    if(!data.resultado)throw new Error(data.msg||'Sin resultado');
+    const clean=data.resultado.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
 
     if(tipo==='gasto'){
-      if(parsed.local) document.getElementById('g-local').value = parsed.local;
-      if(parsed.fecha) document.getElementById('g-fecha').value = parsed.fecha;
-      if(parsed.total) document.getElementById('g-importe').value = parsed.total;
-      if(parsed.moneda) document.getElementById('g-moneda').value = parsed.moneda;
-      // Guardar items y tipo_doc en GD
-      GD.items = parsed.items||[];
-      GD.tipo_doc = parsed.tipo_doc||'FACTURA';
-      // Mostrar items extraídos
+      if(parsed.local)document.getElementById('g-local').value=parsed.local;
+      if(parsed.fecha)document.getElementById('g-fecha').value=parsed.fecha;
+      if(parsed.total)document.getElementById('g-importe').value=parsed.total;
+      if(parsed.moneda)document.getElementById('g-moneda').value=parsed.moneda;
+      GD.items=parsed.items||[];
+      GD.tipo_doc=parsed.tipo_doc==='FACTURA'?'Factura A':(parsed.tipo_doc||'Factura A');
       if(parsed.items&&parsed.items.length){
-        const itemsHtml = parsed.items.map(it=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg2);font-size:12px;"><span>${it.desc}</span><span style="color:var(--marron);font-weight:bold;">${it.cant>1?it.cant+'× ':''}\$${(it.subtotal||it.precio_unit||0).toLocaleString('es-AR')}</span></div>`).join('');
-        document.getElementById('g-desc').value = parsed.items.map(it=>`${it.cant>1?it.cant+'x ':''} ${it.desc}`).join(' | ');
-        // Insert items preview
-        const existing = document.getElementById('items-preview-g');
-        if(existing) existing.remove();
-        const div = document.createElement('div');
-        div.id='items-preview-g';
-        div.style.cssText='background:var(--bg2);border-radius:10px;padding:10px;margin-bottom:10px;';
-        div.innerHTML='<div style="font-size:11px;font-weight:bold;color:var(--tx2);margin-bottom:6px;">ÍTEMS DETECTADOS</div>'+itemsHtml;
-        document.getElementById('g-desc').parentElement.insertAdjacentElement('beforebegin',div);
+        document.getElementById('g-desc').value=parsed.items.map(function(it){return (it.cant>1?it.cant+'x ':'')+it.desc;}).join(' | ');
       }
-      // Preguntar si tipo_doc es CONSULTAR
       if(parsed.tipo_doc==='CONSULTAR'){
-        statusEl.innerHTML=`⚠️ ¿Es factura o remito? <button class="btn btn-xs btn-s" onclick="GD.tipo_doc='FACTURA';this.parentElement.textContent='FACTURA'">Factura</button> <button class="btn btn-xs btn-s" onclick="GD.tipo_doc='REMITO';this.parentElement.textContent='REMITO'">Remito</button>`;
-      } else {
-        statusEl.textContent = '✅ IA extrajo los datos ('+parsed.tipo_doc+'). Revisá y corregí si hace falta.';
+        if(statusEl)statusEl.innerHTML='Tipo de documento: <button class="btn btn-xs btn-s" style="margin:2px" onclick="GD.tipo_doc=\'Factura A\'">Factura A</button><button class="btn btn-xs btn-s" style="margin:2px" onclick="GD.tipo_doc=\'Factura X\'">Factura X</button><button class="btn btn-xs btn-s" style="margin:2px" onclick="GD.tipo_doc=\'Remito\'">Remito</button>';
+      }else{
+        setTipoDoc(GD.tipo_doc);
+        if(statusEl)statusEl.textContent='Datos extraidos ('+GD.tipo_doc+'). Revisa y corrige si hace falta.';
       }
-    } else {
-      if(parsed.proveedor) document.getElementById('mp-prov').value = parsed.proveedor;
-      if(parsed.producto){
-        const sel = document.getElementById('mp-producto');
-        const opts = [...sel.options].map(o=>o.value.toLowerCase());
-        if(opts.includes(parsed.producto.toLowerCase())) sel.value = parsed.producto;
+    }else{
+      if(parsed.proveedor)document.getElementById('mp-prov').value=parsed.proveedor;
+      if(parsed.items&&parsed.items.length){
+        var first=parsed.items[0];
+        if(first.cantidad)document.getElementById('mp-cant').value=first.cantidad;
+        if(first.unidad)document.getElementById('mp-unidad').value=first.unidad;
+        var sel=document.getElementById('mp-producto');
+        if(first.producto){
+          var opts=[].slice.call(sel.options).map(function(o){return o.value.toLowerCase();});
+          if(opts.indexOf(first.producto.toLowerCase())>-1)sel.value=first.producto;
+        }
       }
-      if(parsed.cantidad) document.getElementById('mp-cant').value = parsed.cantidad;
-      if(parsed.unidad) document.getElementById('mp-unidad').value = parsed.unidad;
-      if(parsed.precio) document.getElementById('mp-precio').value = parsed.precio;
-      if(parsed.moneda) document.getElementById('mp-moneda').value = parsed.moneda;
-      if(parsed.fecha) document.getElementById('mp-fecha').value = parsed.fecha;
-      // Autocompletar proveedor conocido
-      const provConocido = DB.proveedores.find(p=>p.nombre.toLowerCase()===parsed.proveedor?.toLowerCase());
-      if(provConocido?.producto){
-        const sel = document.getElementById('mp-producto');
-        const opts = [...sel.options].map(o=>o.value.toLowerCase());
-        if(opts.includes(provConocido.producto.toLowerCase())) sel.value = provConocido.producto;
+      if(parsed.total)document.getElementById('mp-precio').value=parsed.total;
+      if(parsed.moneda)document.getElementById('mp-moneda').value=parsed.moneda;
+      if(parsed.fecha)document.getElementById('mp-fecha').value=parsed.fecha;
+      var provConocido=DB.proveedores.find(function(p){return p.nombre.toLowerCase()===(parsed.proveedor||'').toLowerCase();});
+      if(provConocido&&provConocido.producto){
+        var sel2=document.getElementById('mp-producto');
+        var opts2=[].slice.call(sel2.options).map(function(o){return o.value.toLowerCase();});
+        if(opts2.indexOf(provConocido.producto.toLowerCase())>-1)sel2.value=provConocido.producto;
       }
-      statusEl.textContent = '✅ IA extrajo los datos. Revisá y corregí si hace falta.';
+      if(statusEl)statusEl.textContent='Datos extraidos. Revisa y corrige si hace falta.';
     }
-  } catch(err){
-    statusEl.textContent = '⚠️ No se pudieron extraer los datos automáticamente. Completá a mano.';
+  }catch(err){
+    if(statusEl)statusEl.textContent='No se pudo leer: '+err.message+'. Completa los datos a mano.';
+    console.error('OCR:',err);
   }
-  input.value = '';
+  input.value='';
 }
 
 function fileToBase64(file){
   return new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload = ()=>res(r.result.split(',')[1]);
-    r.onerror = ()=>rej();
-    r.readAsDataURL(file);
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      // Comprimir a max 800px y calidad 0.7
+      const maxW = 800, maxH = 800;
+      let w = img.width, h = img.height;
+      if(w > maxW || h > maxH){
+        const ratio = Math.min(maxW/w, maxH/h);
+        w = Math.round(w*ratio);
+        h = Math.round(h*ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      res(dataUrl.split(',')[1]);
+    };
+    img.onerror = ()=>rej();
+    img.src = url;
   });
 }
 
